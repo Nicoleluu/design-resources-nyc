@@ -132,6 +132,18 @@ button[aria-pressed="true"] {
   color: var(--accent);
 }
 
+.maplibregl-popup-content a {
+  display: inline-block;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.popup-note,
+.popup-source {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 .popup-category {
   font-size: 0.68rem;
   font-weight: 700;

@@ -17,6 +17,7 @@ const map = new maplibregl.Map({
   style: "https://tiles.openfreemap.org/styles/dark",
   center: [-73.97, 40.71],
   zoom: 9.7,
+  clickTolerance: 6,
   attributionControl: false,
 });
 
@@ -99,10 +100,24 @@ map.on("load", async () => {
         colors.connect,
         "#ffffff",
       ],
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 4, 14, 8],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 6, 14, 10],
       "circle-stroke-color": "#0c1115",
       "circle-stroke-width": 1.5,
     },
+  });
+
+  map.on("click", "resource-clusters", async (event) => {
+    const cluster = event.features[0];
+    const clusterId = cluster.properties.cluster_id;
+    const source = map.getSource("design-resources");
+    const zoom = await source.getClusterExpansionZoom(clusterId);
+    map.easeTo({
+      center: cluster.geometry.coordinates,
+      zoom,
+      duration: 550,
+    });
+    statusElement.textContent =
+      "Cluster opened · continue clicking clusters to reach individual resources";
   });
 
   map.on("click", "resource-points", (event) => {
@@ -110,13 +125,21 @@ map.on("load", async () => {
     const properties = feature.properties;
     const website = properties.website
       ? `<a href="${properties.website}" target="_blank" rel="noreferrer">Visit website</a>`
+      : "<span class=\"popup-note\">No website listed in the source data</span>";
+    const location = [properties.neighborhood, properties.borough]
+      .filter(Boolean)
+      .join(" · ");
+    const address = properties.address
+      ? `<p>${properties.address}</p>`
       : "";
     new maplibregl.Popup({ offset: 10 })
       .setLngLat(feature.geometry.coordinates)
       .setHTML(`
         <p class="popup-category">${properties.category}</p>
         <h2>${properties.name}</h2>
-        <p>${properties.neighborhood || properties.borough || ""}</p>
+        <p>${location}</p>
+        ${address}
+        <p class="popup-source">Source: ${properties.source}</p>
         ${website}
       `)
       .addTo(map);
@@ -129,7 +152,14 @@ map.on("load", async () => {
     map.getCanvas().style.cursor = "";
   });
 
-  statusElement.textContent = `${summary.total} preliminary resources · review required`;
+  map.on("mouseenter", "resource-clusters", () => {
+    map.getCanvas().style.cursor = "zoom-in";
+  });
+  map.on("mouseleave", "resource-clusters", () => {
+    map.getCanvas().style.cursor = "";
+  });
+
+  statusElement.textContent = `${summary.total} preliminary resources · click a numbered cluster to explore`;
 });
 
 categoryButtons.forEach((button) => {
