@@ -45,9 +45,151 @@ KNOWN_DESIGN_SCHOOLS = {
     "school of visual arts",
 }
 
+EXPERIENCE_TERMS = {
+    "architecture",
+    "architectural",
+    "ceramic",
+    "craft",
+    "decorative",
+    "design",
+    "drawing",
+    "fashion",
+    "graphic",
+    "illustration",
+    "industrial",
+    "media art",
+    "modern art",
+    "photography",
+    "poster",
+    "printing",
+    "sculpture",
+    "textile",
+    "typography",
+    "visual art",
+}
+
+KNOWN_EXPERIENCE_RESOURCES = {
+    "brooklyn museum",
+    "center for architecture",
+    "cooper hewitt",
+    "guggenheim museum",
+    "international center of photography",
+    "isamu noguchi",
+    "museum of arts and design",
+    "museum of modern art",
+    "new museum",
+    "poster house",
+    "queens museum",
+    "sculpturecenter",
+    "storefront for art and architecture",
+    "the drawing center",
+    "whitney museum",
+}
+
+MAKE_CRAFTS = {
+    "atelier",
+    "bookbinder",
+    "cabinet_maker",
+    "carpenter",
+    "glassblower",
+    "handicraft",
+    "pottery",
+    "printer",
+    "screen_printer",
+    "sculptor",
+    "textile_printing",
+}
+
+MAKE_NAME_TERMS = {
+    "atelier",
+    "ceramic",
+    "clay",
+    "collective",
+    "craft",
+    "fab lab",
+    "fabrication",
+    "foundry",
+    "glass",
+    "lab",
+    "maker",
+    "pottery",
+    "print",
+    "sculpture",
+    "screen printing",
+    "textile",
+    "woodwork",
+    "workshop",
+}
+
+LEARN_TERMS = {
+    "architecture",
+    "design",
+    "drawing",
+    "fashion",
+    "film",
+    "fine arts",
+    "interior",
+    "media",
+    "sculpture",
+    "technology",
+    "visual arts",
+}
+
+CONNECT_TERMS = {
+    "architecture",
+    "art",
+    "arts",
+    "civic",
+    "creative",
+    "design",
+    "graphic",
+    "internet art",
+    "media",
+    "public space",
+}
+
+ORGANIZATION_TERMS = {
+    "association",
+    "club",
+    "collective",
+    "council",
+    "foundation",
+    "institute",
+    "league",
+    "society",
+    "trust",
+}
+
+NAME_ALIASES = {
+    "center for architecture inc": "center for architecture",
+    "cooper hewitt national design museum": "cooper hewitt",
+    "cooper hewitt smithsonian design museum": "cooper hewitt",
+    "drawing center inc": "drawing center",
+    "museum of arts design": "museum of arts and design",
+    "sculpture center inc": "sculpturecenter",
+    "sculpture center": "sculpturecenter",
+    "the cooper union": "cooper union",
+    "the drawing center": "drawing center",
+    "new museum of contemporary art": "new museum",
+    "kentler international drawing space inc": "kentler international drawing space",
+}
+
+EXCLUDED_NAMES = {
+    "abc cooperation",
+    "bowne house historical society inc",
+    "crown heights north association inc",
+    "hamilton grange national memorial",
+    "hetrick martin institute",
+    "historic aircraft restoration project hangar b",
+    "intrepid museum",
+    "riseboro community partnership",
+    "town hall civic association of springfield gardens",
+}
+
 
 def normalize_name(value):
-    return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+    normalized = re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+    return NAME_ALIASES.get(normalized, normalized)
 
 
 def contains_design_term(text):
@@ -55,6 +197,11 @@ def contains_design_term(text):
     return bool(words & DESIGN_TERMS) or any(
         school in normalize_name(text) for school in KNOWN_DESIGN_SCHOOLS
     )
+
+
+def contains_phrase(text, phrases):
+    normalized = normalize_name(text)
+    return any(normalize_name(phrase) in normalized for phrase in phrases)
 
 
 def point_in_ring(point, ring):
@@ -103,30 +250,41 @@ def osm_category(tags):
         for key in ("name", "description", "operator", "subject", "craft")
     )
     design_related = contains_design_term(searchable)
+    normalized_name = normalize_name(name)
 
     if tags.get("makerspace") == "yes":
         return "make", "OpenStreetMap makerspace tag"
-    if tags.get("craft") and (
-        design_related
-        or tags.get("shop") in {"craft", "art", "fabric", "sewing", "hardware"}
+    if tags.get("craft") in MAKE_CRAFTS and (
+        contains_phrase(name, MAKE_NAME_TERMS)
+        or tags.get("shop") in {"craft", "art", "fabric", "sewing", "pottery"}
     ):
-        return "make", "OpenStreetMap craft/workshop tag"
-    if tags.get("tourism") in {"museum", "gallery"} and design_related:
-        return "experience", "Design-related museum or gallery"
-    if tags.get("amenity") == "arts_centre":
-        return "experience", "OpenStreetMap arts-centre tag"
-    if tags.get("amenity") in {"college", "university"} and (
-        design_related or contains_design_term(name)
-    ):
-        return "learn", "Design-related college or university"
-    if tags.get("amenity") == "library" and design_related:
-        return "learn", "Design-related library"
+        return "make", "Named making space with a relevant craft tag"
     if (
         tags.get("community_centre")
         or tags.get("club") == "art"
         or tags.get("office") == "association"
-    ) and design_related:
+    ) and contains_phrase(searchable, CONNECT_TERMS):
         return "connect", "Design-related community or association"
+    if (
+        tags.get("tourism") in {"museum", "gallery"}
+        or tags.get("amenity") == "arts_centre"
+    ) and (
+        contains_phrase(searchable, EXPERIENCE_TERMS)
+        or contains_phrase(name, KNOWN_EXPERIENCE_RESOURCES)
+    ):
+        return "experience", "Design-focused museum, gallery, or arts center"
+    if tags.get("amenity") in {"college", "university"} and (
+        contains_phrase(name, LEARN_TERMS)
+        or any(school in normalized_name for school in KNOWN_DESIGN_SCHOOLS)
+    ):
+        if any(
+            phrase in normalized_name
+            for phrase in ("president s house", "academic building", "arnold hall")
+        ):
+            return "", "Campus building rather than a separate learning resource"
+        return "learn", "Design-related college or university"
+    if tags.get("amenity") == "library" and contains_phrase(name, LEARN_TERMS):
+        return "learn", "Design-related library"
     return "", "Requires manual review"
 
 
@@ -196,9 +354,16 @@ def dcla_records(neighborhoods):
             category = ""
             reason = "Requires manual review"
             if discipline == "Architecture/Design":
-                category = "experience"
-                reason = "DCLA Architecture/Design discipline"
-            elif discipline in {"Visual Arts", "Museum", "Photography", "New Media"} and contains_design_term(name):
+                if contains_phrase(name, ORGANIZATION_TERMS):
+                    category = "connect"
+                    reason = "DCLA Architecture/Design professional organization"
+                else:
+                    category = "experience"
+                    reason = "DCLA Architecture/Design discipline"
+            elif discipline in {"Visual Arts", "Museum", "Photography", "New Media"} and (
+                contains_phrase(name, EXPERIENCE_TERMS)
+                or contains_phrase(name, KNOWN_EXPERIENCE_RESOURCES)
+            ):
                 category = "experience"
                 reason = f"Design-related name in DCLA {discipline} discipline"
 
@@ -232,7 +397,7 @@ def deduplicate(records):
     result = {}
     for record in records:
         key = normalize_name(record["name"])
-        if not key:
+        if not key or key in EXCLUDED_NAMES:
             continue
         existing = result.get(key)
         if existing is None or (
@@ -280,13 +445,10 @@ def write_outputs(records, review):
         writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
         for record in sorted(review, key=lambda item: item["name"].lower()):
-            writer.writerow(
-                {
-                    "include": "yes" if record["category"] else "",
-                    "suggested_category": record["category"],
-                    **{key: record.get(key, "") for key in fields},
-                }
-            )
+            row = {key: record.get(key, "") for key in fields}
+            row["include"] = "yes" if record["category"] else ""
+            row["suggested_category"] = record["category"]
+            writer.writerow(row)
 
     counts = Counter(record["category"] for record in records)
     with (PROCESSED / "summary.json").open("w") as file:
