@@ -102,3 +102,43 @@ button[aria-pressed="true"] {
   font-size: 0.78rem;
 }
 
+.layer-list button {
+  border-left: 3px solid var(--category-color, var(--line));
+}
+
+.maplibregl-popup-content {
+  max-width: 260px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: #12191f;
+  color: var(--text);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+.maplibregl-popup-content h2 {
+  margin: 4px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.maplibregl-popup-content p {
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+.maplibregl-popup-content a,
+.popup-category {
+  color: var(--accent);
+}
+
+.popup-category {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.maplibregl-popup-close-button {
+  color: var(--text);
+}
