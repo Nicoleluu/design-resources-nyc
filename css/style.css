@@ -128,6 +128,28 @@ body {
   flex-direction: column;
 }
 
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.mode-switch button {
+  padding: 8px 6px;
+  border: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.mode-switch button[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--background);
+  opacity: 1;
+}
+
 .reset-map {
   width: calc(100% - 36px);
   margin: 16px 18px 0;
@@ -194,6 +216,98 @@ button[aria-pressed="false"] {
 .distribution-bar span {
   width: var(--bar-width, 0%);
   background: var(--category-color);
+}
+
+.choropleth-legend {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+}
+
+.choropleth-legend div {
+  min-width: 0;
+}
+
+.choropleth-legend span {
+  display: block;
+  height: 12px;
+  background: var(--level-color);
+}
+
+.choropleth-legend [data-level="0"] {
+  --level-color: #1a2326;
+}
+
+.choropleth-legend [data-level="1"] {
+  --level-color: #3b4b42;
+}
+
+.choropleth-legend [data-level="2"] {
+  --level-color: #667548;
+}
+
+.choropleth-legend [data-level="3"] {
+  --level-color: #9cae55;
+}
+
+.choropleth-legend [data-level="4"] {
+  --level-color: #d9e875;
+}
+
+.choropleth-legend em {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-style: normal;
+  text-align: center;
+}
+
+.analysis-stats {
+  margin: 18px 0 0;
+}
+
+.analysis-stats div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.analysis-stats dt {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.analysis-stats dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.method-note {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.neighborhood-popup-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 16px;
+  margin: 12px 0;
+}
+
+.neighborhood-popup-grid span:nth-child(even) {
+  font-weight: 700;
+  text-align: right;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .status {

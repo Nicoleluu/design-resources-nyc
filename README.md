@@ -20,6 +20,27 @@ This project expands the course assignments on loading and visualizing spatial d
 3. Map-ready GeoJSON will be written to `data/processed`.
 4. JavaScript and MapLibre GL JS will render an interactive web map.
 
+## Analytical purpose
+
+The project asks: **How evenly are design-related resources distributed across
+New York City?**
+
+The website has two map modes:
+
+- **Resources** shows individual documented locations by category.
+- **Neighborhoods** aggregates those locations into the 262 NYC Neighborhood
+  Tabulation Areas and maps their concentration.
+
+The neighborhood workflow is a spatial join implemented in
+`scripts/process_data.py`. For every neighborhood, it calculates the total and
+category-specific resource counts, share of the citywide inventory, and
+difference from the NYC neighborhood average. The output is
+`data/processed/neighborhood-resource-analysis.geojson`.
+
+The analysis measures the geographic concentration of documented locations. It
+does not measure affordability, eligibility, quality, capacity, opening hours,
+or whether a resource is publicly accessible.
+
 ## Project structure
 
 ```text
@@ -48,4 +69,3 @@ Then visit `http://localhost:8000`.
 ## Data attribution
 
 Data sources include NYC Open Data, the NYC Department of City Planning, the NYC Department of Cultural Affairs, and OpenStreetMap contributors. See `documentation/sources.md`.
-

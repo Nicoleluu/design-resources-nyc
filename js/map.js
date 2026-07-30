@@ -2,10 +2,17 @@ const statusElement = document.querySelector("#map-status");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
 const resetMapButton = document.querySelector("#reset-map");
 const resourceTotalElement = document.querySelector("#resource-total");
+const modeButtons = [...document.querySelectorAll("[data-mode]")];
+const resourcePanels = [...document.querySelectorAll("[data-resource-panel]")];
+const neighborhoodPanels = [
+  ...document.querySelectorAll("[data-neighborhood-panel]"),
+];
 const activeCategories = new Set(
   categoryButtons.map((button) => button.dataset.category),
 );
 let resourceData = null;
+let neighborhoodData = null;
+let mapMode = "resources";
 
 const colors = {
   learn: "#68b7df",
@@ -56,14 +63,58 @@ function updateFilter() {
   statusElement.textContent = `${visibleFeatures.length} visible resources · ${activeCategories.size} active categories`;
 }
 
+function setMapMode(mode) {
+  mapMode = mode;
+  modeButtons.forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+  });
+  resourcePanels.forEach((panel) => {
+    panel.hidden = mode !== "resources";
+  });
+  neighborhoodPanels.forEach((panel) => {
+    panel.hidden = mode !== "neighborhoods";
+  });
+
+  if (!map.getLayer("resource-points")) return;
+  map.setLayoutProperty(
+    "resource-points",
+    "visibility",
+    mode === "resources" ? "visible" : "none",
+  );
+  map.setLayoutProperty(
+    "neighborhood-fill",
+    "visibility",
+    mode === "neighborhoods" ? "visible" : "none",
+  );
+  map.setLayoutProperty(
+    "neighborhood-outline",
+    "visibility",
+    mode === "neighborhoods" ? "visible" : "none",
+  );
+  fitToFeatures(resourceData.features);
+
+  if (mode === "neighborhoods") {
+    const analysis = neighborhoodData.analysis;
+    statusElement.textContent = `${analysis.neighborhoods_with_resources} of ${analysis.neighborhood_total} neighborhoods contain documented resources`;
+  } else {
+    updateFilter();
+  }
+}
+
 map.on("load", async () => {
-  const [dataResponse, summaryResponse] = await Promise.all([
+  const [dataResponse, summaryResponse, neighborhoodResponse] = await Promise.all([
     fetch("data/processed/design-resources.geojson"),
     fetch("data/processed/summary.json"),
+    fetch("data/processed/neighborhood-resource-analysis.geojson"),
   ]);
   resourceData = await dataResponse.json();
   const summary = await summaryResponse.json();
+  neighborhoodData = await neighborhoodResponse.json();
   resourceTotalElement.textContent = summary.total;
+  document.querySelector("#neighborhoods-with-resources").textContent =
+    `${neighborhoodData.analysis.neighborhoods_with_resources} / ${neighborhoodData.analysis.neighborhood_total}`;
+  document.querySelector("#neighborhood-average").textContent =
+    `${neighborhoodData.analysis.city_average} resources`;
   Object.entries(summary.categories).forEach(([category, count]) => {
     const countElement = document.querySelector(`[data-count="${category}"]`);
     const barElement = document.querySelector(`[data-bar="${category}"]`);
@@ -77,6 +128,50 @@ map.on("load", async () => {
   map.addSource("design-resources", {
     type: "geojson",
     data: resourceData,
+  });
+
+  map.addSource("neighborhood-analysis", {
+    type: "geojson",
+    data: neighborhoodData,
+  });
+
+  map.addLayer({
+    id: "neighborhood-fill",
+    type: "fill",
+    source: "neighborhood-analysis",
+    layout: { visibility: "none" },
+    paint: {
+      "fill-color": [
+        "step",
+        ["get", "resource_total"],
+        "#1a2326",
+        1,
+        "#3b4b42",
+        3,
+        "#667548",
+        6,
+        "#9cae55",
+        11,
+        "#d9e875",
+      ],
+      "fill-opacity": [
+        "case",
+        ["==", ["get", "resource_total"], 0],
+        0.28,
+        0.78,
+      ],
+    },
+  });
+
+  map.addLayer({
+    id: "neighborhood-outline",
+    type: "line",
+    source: "neighborhood-analysis",
+    layout: { visibility: "none" },
+    paint: {
+      "line-color": "rgba(230, 238, 230, 0.38)",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.45, 13, 1.2],
+    },
   });
 
   map.addLayer({
@@ -135,6 +230,33 @@ map.on("load", async () => {
     map.getCanvas().style.cursor = "";
   });
 
+  map.on("click", "neighborhood-fill", (event) => {
+    const properties = event.features[0].properties;
+    new maplibregl.Popup({ offset: 8 })
+      .setLngLat(event.lngLat)
+      .setHTML(`
+        <p class="popup-category">${properties.borough}</p>
+        <h2>${properties.neighborhood}</h2>
+        <div class="neighborhood-popup-grid">
+          <span>Total resources</span><span>${properties.resource_total}</span>
+          <span>Learn</span><span>${properties.learn_count}</span>
+          <span>Experience</span><span>${properties.experience_count}</span>
+          <span>Make</span><span>${properties.make_count}</span>
+          <span>Connect</span><span>${properties.connect_count}</span>
+          <span>Share of NYC total</span><span>${properties.city_share_pct}%</span>
+        </div>
+        <p class="popup-source">${properties.comparison}</p>
+      `)
+      .addTo(map);
+  });
+
+  map.on("mouseenter", "neighborhood-fill", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "neighborhood-fill", () => {
+    map.getCanvas().style.cursor = "";
+  });
+
   fitToFeatures(resourceData.features, false);
   statusElement.textContent = `${summary.total} preliminary resources · click a colored point for details`;
 });
@@ -157,6 +279,10 @@ categoryButtons.forEach((button) => {
   });
 });
 
+modeButtons.forEach((button) => {
+  button.addEventListener("click", () => setMapMode(button.dataset.mode));
+});
+
 resetMapButton.addEventListener("click", () => {
   const visibleFeatures = resourceData
     ? resourceData.features.filter((feature) =>
@@ -164,5 +290,9 @@ resetMapButton.addEventListener("click", () => {
       )
     : [];
   fitToFeatures(visibleFeatures);
-  statusElement.textContent = `${visibleFeatures.length} visible resources · full NYC extent`;
+  if (mapMode === "neighborhoods") {
+    statusElement.textContent = `${neighborhoodData.analysis.neighborhoods_with_resources} of ${neighborhoodData.analysis.neighborhood_total} neighborhoods contain documented resources`;
+  } else {
+    statusElement.textContent = `${visibleFeatures.length} visible resources · full NYC extent`;
+  }
 });

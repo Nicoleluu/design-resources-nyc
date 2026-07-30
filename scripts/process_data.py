@@ -407,7 +407,89 @@ def deduplicate(records):
     return sorted(result.values(), key=lambda item: item["name"].lower())
 
 
-def write_outputs(records, review):
+def write_neighborhood_analysis(neighborhoods, records):
+    counts_by_nta = {}
+    for record in records:
+        nta_code = record.get("nta_code", "")
+        if not nta_code:
+            continue
+        neighborhood_counts = counts_by_nta.setdefault(
+            nta_code,
+            {"total": 0, "learn": 0, "experience": 0, "make": 0, "connect": 0},
+        )
+        neighborhood_counts["total"] += 1
+        neighborhood_counts[record["category"]] += 1
+
+    neighborhood_total = len(neighborhoods)
+    city_average = len(records) / neighborhood_total if neighborhood_total else 0
+    analyzed_features = []
+    for feature in neighborhoods:
+        properties = feature["properties"]
+        nta_code = properties.get("nta2020", "")
+        counts = counts_by_nta.get(
+            nta_code,
+            {"total": 0, "learn": 0, "experience": 0, "make": 0, "connect": 0},
+        )
+        total = counts["total"]
+        difference = total - city_average
+        if total == 0:
+            comparison = "No documented resources"
+        elif difference > 0:
+            comparison = f"{difference:.1f} above the neighborhood average"
+        else:
+            comparison = f"{abs(difference):.1f} below the neighborhood average"
+
+        analyzed_features.append(
+            {
+                "type": "Feature",
+                "geometry": feature["geometry"],
+                "properties": {
+                    "nta_code": nta_code,
+                    "neighborhood": properties.get("ntaname", ""),
+                    "borough": properties.get("boroname", ""),
+                    "resource_total": total,
+                    "learn_count": counts["learn"],
+                    "experience_count": counts["experience"],
+                    "make_count": counts["make"],
+                    "connect_count": counts["connect"],
+                    "city_share_pct": round(
+                        (total / len(records) * 100) if records else 0, 2
+                    ),
+                    "city_average": round(city_average, 2),
+                    "difference_from_average": round(difference, 2),
+                    "comparison": comparison,
+                },
+            }
+        )
+
+    populated = sum(
+        1
+        for feature in analyzed_features
+        if feature["properties"]["resource_total"] > 0
+    )
+    output = {
+        "type": "FeatureCollection",
+        "analysis": {
+            "resource_total": len(records),
+            "neighborhood_total": neighborhood_total,
+            "neighborhoods_with_resources": populated,
+            "neighborhoods_without_resources": neighborhood_total - populated,
+            "city_average": round(city_average, 2),
+            "maximum_count": max(
+                (
+                    feature["properties"]["resource_total"]
+                    for feature in analyzed_features
+                ),
+                default=0,
+            ),
+        },
+        "features": analyzed_features,
+    }
+    with (PROCESSED / "neighborhood-resource-analysis.geojson").open("w") as file:
+        json.dump(output, file)
+
+
+def write_outputs(neighborhoods, records, review):
     PROCESSED.mkdir(parents=True, exist_ok=True)
     features = [
         {
@@ -453,6 +535,7 @@ def write_outputs(records, review):
     counts = Counter(record["category"] for record in records)
     with (PROCESSED / "summary.json").open("w") as file:
         json.dump({"total": len(records), "categories": counts}, file, indent=2)
+    write_neighborhood_analysis(neighborhoods, records)
 
 
 def main():
@@ -460,7 +543,7 @@ def main():
     osm, osm_review = osm_records(neighborhoods)
     dcla, dcla_review = dcla_records(neighborhoods)
     records = deduplicate(osm + dcla)
-    write_outputs(records, osm_review + dcla_review)
+    write_outputs(neighborhoods, records, osm_review + dcla_review)
     counts = Counter(record["category"] for record in records)
     print(f"Exported {len(records)} resources: {dict(counts)}")
 
