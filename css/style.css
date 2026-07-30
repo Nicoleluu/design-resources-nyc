@@ -82,6 +82,17 @@ h1 {
   gap: 8px;
 }
 
+.reset-map {
+  width: 100%;
+  margin-top: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.reset-map:hover {
+  color: var(--text);
+}
+
 button {
   padding: 10px 12px;
   border: 1px solid var(--line);

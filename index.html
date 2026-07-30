@@ -12,7 +12,7 @@
       href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=20260729-2" />
   </head>
   <body>
     <main class="map-shell">
@@ -33,6 +33,9 @@
           <button type="button" data-category="make">Make</button>
           <button type="button" data-category="connect">Connect</button>
         </div>
+        <button class="reset-map" id="reset-map" type="button">
+          Show all NYC resources
+        </button>
         <p class="status" id="map-status">Preparing the map interface.</p>
       </aside>
 
@@ -40,7 +43,6 @@
     </main>
 
     <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
-    <script src="js/map.js"></script>
+    <script src="js/map.js?v=20260729-3"></script>
   </body>
 </html>
-

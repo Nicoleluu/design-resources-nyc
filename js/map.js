@@ -1,5 +1,6 @@
 const statusElement = document.querySelector("#map-status");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
+const resetMapButton = document.querySelector("#reset-map");
 const activeCategories = new Set(
   categoryButtons.map((button) => button.dataset.category),
 );
@@ -27,6 +28,20 @@ map.addControl(
   "bottom-right",
 );
 
+function fitToFeatures(features, animate = true) {
+  if (!features.length) return;
+  const bounds = new maplibregl.LngLatBounds();
+  features.forEach((feature) => bounds.extend(feature.geometry.coordinates));
+  const narrowScreen = window.innerWidth < 700;
+  map.fitBounds(bounds, {
+    padding: narrowScreen
+      ? { top: 180, right: 36, bottom: 230, left: 36 }
+      : { top: 60, right: 60, bottom: 60, left: 430 },
+    maxZoom: 10.5,
+    duration: animate ? 650 : 0,
+  });
+}
+
 function updateFilter() {
   if (!resourceData) return;
   const visibleFeatures = resourceData.features.filter((feature) =>
@@ -36,6 +51,7 @@ function updateFilter() {
     type: "FeatureCollection",
     features: visibleFeatures,
   });
+  fitToFeatures(visibleFeatures);
   statusElement.textContent = `${visibleFeatures.length} visible resources · ${activeCategories.size} active categories`;
 }
 
@@ -50,42 +66,12 @@ map.on("load", async () => {
   map.addSource("design-resources", {
     type: "geojson",
     data: resourceData,
-    cluster: true,
-    clusterMaxZoom: 12,
-    clusterRadius: 42,
-  });
-
-  map.addLayer({
-    id: "resource-clusters",
-    type: "circle",
-    source: "design-resources",
-    filter: ["has", "point_count"],
-    paint: {
-      "circle-color": "#dce5e3",
-      "circle-opacity": 0.9,
-      "circle-radius": ["step", ["get", "point_count"], 15, 20, 20, 60, 26],
-      "circle-stroke-color": "#0c1115",
-      "circle-stroke-width": 2,
-    },
-  });
-
-  map.addLayer({
-    id: "cluster-count",
-    type: "symbol",
-    source: "design-resources",
-    filter: ["has", "point_count"],
-    layout: {
-      "text-field": ["get", "point_count_abbreviated"],
-      "text-size": 11,
-    },
-    paint: { "text-color": "#0c1115" },
   });
 
   map.addLayer({
     id: "resource-points",
     type: "circle",
     source: "design-resources",
-    filter: ["!", ["has", "point_count"]],
     paint: {
       "circle-color": [
         "match",
@@ -104,20 +90,6 @@ map.on("load", async () => {
       "circle-stroke-color": "#0c1115",
       "circle-stroke-width": 1.5,
     },
-  });
-
-  map.on("click", "resource-clusters", async (event) => {
-    const cluster = event.features[0];
-    const clusterId = cluster.properties.cluster_id;
-    const source = map.getSource("design-resources");
-    const zoom = await source.getClusterExpansionZoom(clusterId);
-    map.easeTo({
-      center: cluster.geometry.coordinates,
-      zoom,
-      duration: 550,
-    });
-    statusElement.textContent =
-      "Cluster opened · continue clicking clusters to reach individual resources";
   });
 
   map.on("click", "resource-points", (event) => {
@@ -152,14 +124,8 @@ map.on("load", async () => {
     map.getCanvas().style.cursor = "";
   });
 
-  map.on("mouseenter", "resource-clusters", () => {
-    map.getCanvas().style.cursor = "zoom-in";
-  });
-  map.on("mouseleave", "resource-clusters", () => {
-    map.getCanvas().style.cursor = "";
-  });
-
-  statusElement.textContent = `${summary.total} preliminary resources · click a numbered cluster to explore`;
+  fitToFeatures(resourceData.features, false);
+  statusElement.textContent = `${summary.total} preliminary resources · click a colored point for details`;
 });
 
 categoryButtons.forEach((button) => {
@@ -178,4 +144,14 @@ categoryButtons.forEach((button) => {
     );
     updateFilter();
   });
+});
+
+resetMapButton.addEventListener("click", () => {
+  const visibleFeatures = resourceData
+    ? resourceData.features.filter((feature) =>
+        activeCategories.has(feature.properties.category),
+      )
+    : [];
+  fitToFeatures(visibleFeatures);
+  statusElement.textContent = `${visibleFeatures.length} visible resources · full NYC extent`;
 });
