@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
   --background: #0c1115;
-  --panel: rgba(18, 25, 31, 0.94);
+  --panel: rgba(16, 22, 26, 0.97);
   --line: rgba(220, 229, 232, 0.18);
   --text: #edf1ef;
   --muted: #9ca8a7;
@@ -28,63 +28,104 @@ body {
   font-family: Inter, Arial, sans-serif;
 }
 
-.project-header,
-.map-panel {
+.app-bar {
   position: absolute;
   z-index: 2;
-  left: 24px;
-  width: min(360px, calc(100vw - 48px));
-  border: 1px solid var(--line);
+  inset: 0 0 auto;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
   background: var(--panel);
-  backdrop-filter: blur(14px);
 }
 
-.project-header {
-  top: 24px;
-  padding: 20px;
-}
-
-.eyebrow,
-.panel-label {
-  margin: 0 0 10px;
+.app-mark {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--accent);
   color: var(--accent);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
 }
 
-h1 {
+.app-bar h1 {
   margin: 0;
   font-family: Georgia, serif;
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: 1.12rem;
   font-weight: 500;
 }
 
-.dek,
-.status {
+.app-bar p {
+  margin: 0 0 0 auto;
   color: var(--muted);
-  line-height: 1.5;
-}
-
-.dek {
-  margin: 12px 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .map-panel {
-  bottom: 24px;
-  padding: 16px;
+  position: absolute;
+  z-index: 2;
+  top: 64px;
+  bottom: 12px;
+  left: 12px;
+  width: 320px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+}
+
+.map-panel section {
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-intro p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.panel-label {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.total-block strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 2.7rem;
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.total-block span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.76rem;
 }
 
 .layer-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .reset-map {
-  width: 100%;
-  margin-top: 8px;
+  width: calc(100% - 36px);
+  margin: 16px 18px 0;
   color: var(--muted);
   text-align: center;
 }
@@ -94,8 +135,9 @@ h1 {
 }
 
 button {
-  padding: 10px 12px;
-  border: 1px solid var(--line);
+  padding: 11px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
   background: transparent;
   color: var(--text);
   text-align: left;
@@ -104,17 +146,63 @@ button {
 
 button:hover,
 button[aria-pressed="true"] {
-  border-color: var(--accent);
-  background: rgba(200, 218, 105, 0.12);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.status {
-  margin: 12px 0 0;
-  font-size: 0.78rem;
+button[aria-pressed="false"] {
+  opacity: 0.42;
 }
 
 .layer-list button {
-  border-left: 3px solid var(--category-color, var(--line));
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border-left: 0;
+}
+
+.layer-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--category-color);
+}
+
+.layer-name {
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.layer-count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+}
+
+.distribution-bar {
+  display: flex;
+  height: 9px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.distribution-bar span {
+  width: var(--bar-width, 0%);
+  background: var(--category-color);
+}
+
+.status {
+  margin: 12px 18px 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.panel-footer {
+  margin: 20px 18px;
+  color: #788381;
+  font-size: 0.62rem;
+  line-height: 1.5;
 }
 
 .maplibregl-popup-content {
@@ -164,4 +252,33 @@ button[aria-pressed="true"] {
 
 .maplibregl-popup-close-button {
   color: var(--text);
+}
+
+@media (max-width: 700px) {
+  .app-bar p {
+    display: none;
+  }
+
+  .map-panel {
+    top: auto;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
+    max-height: 42vh;
+  }
+
+  .panel-intro,
+  .distribution,
+  .panel-footer {
+    display: none;
+  }
+
+  .map-panel section {
+    padding: 12px 14px;
+  }
+
+  .total-block {
+    display: none;
+  }
 }

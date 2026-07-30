@@ -1,6 +1,7 @@
 const statusElement = document.querySelector("#map-status");
 const categoryButtons = [...document.querySelectorAll("[data-category]")];
 const resetMapButton = document.querySelector("#reset-map");
+const resourceTotalElement = document.querySelector("#resource-total");
 const activeCategories = new Set(
   categoryButtons.map((button) => button.dataset.category),
 );
@@ -36,7 +37,7 @@ function fitToFeatures(features, animate = true) {
   map.fitBounds(bounds, {
     padding: narrowScreen
       ? { top: 180, right: 36, bottom: 230, left: 36 }
-      : { top: 60, right: 60, bottom: 60, left: 430 },
+      : { top: 76, right: 60, bottom: 60, left: 360 },
     maxZoom: 10.5,
     duration: animate ? 650 : 0,
   });
@@ -62,6 +63,16 @@ map.on("load", async () => {
   ]);
   resourceData = await dataResponse.json();
   const summary = await summaryResponse.json();
+  resourceTotalElement.textContent = summary.total;
+  Object.entries(summary.categories).forEach(([category, count]) => {
+    const countElement = document.querySelector(`[data-count="${category}"]`);
+    const barElement = document.querySelector(`[data-bar="${category}"]`);
+    if (countElement) countElement.textContent = count;
+    if (barElement) {
+      barElement.style.setProperty("--bar-width", `${(count / summary.total) * 100}%`);
+      barElement.style.setProperty("--category-color", colors[category]);
+    }
+  });
 
   map.addSource("design-resources", {
     type: "geojson",

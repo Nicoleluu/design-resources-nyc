@@ -16,33 +16,76 @@
   </head>
   <body>
     <main class="map-shell">
-      <header class="project-header">
-        <p class="eyebrow">Mapping Systems · Final Project</p>
+      <header class="app-bar">
+        <div class="app-mark" aria-hidden="true">DR</div>
         <h1>Design Resources NYC</h1>
-        <p class="dek">
-          An exploratory inventory of where people can learn, experience, make,
-          and connect with design in New York City.
-        </p>
+        <p>Mapping Systems · Final Project</p>
       </header>
 
-      <aside class="map-panel" aria-label="Map controls">
-        <p class="panel-label">Resource layers</p>
+      <aside class="map-panel" aria-label="Map information and controls">
+        <section class="panel-intro">
+          <p>
+            An exploratory inventory of where people can learn, experience,
+            make, and connect with design in New York City.
+          </p>
+        </section>
+
+        <section class="total-block">
+          <p class="panel-label">Mapped resources</p>
+          <strong id="resource-total">128</strong>
+          <span>preliminary locations across NYC</span>
+        </section>
+
+        <section>
+          <p class="panel-label">Resource layers</p>
         <div class="layer-list">
-          <button type="button" data-category="learn">Learn</button>
-          <button type="button" data-category="experience">Experience</button>
-          <button type="button" data-category="make">Make</button>
-          <button type="button" data-category="connect">Connect</button>
+            <button type="button" data-category="learn">
+              <span class="layer-swatch"></span>
+              <span class="layer-name">Learn</span>
+              <span class="layer-count" data-count="learn">18</span>
+            </button>
+            <button type="button" data-category="experience">
+              <span class="layer-swatch"></span>
+              <span class="layer-name">Experience</span>
+              <span class="layer-count" data-count="experience">51</span>
+            </button>
+            <button type="button" data-category="make">
+              <span class="layer-swatch"></span>
+              <span class="layer-name">Make</span>
+              <span class="layer-count" data-count="make">38</span>
+            </button>
+            <button type="button" data-category="connect">
+              <span class="layer-swatch"></span>
+              <span class="layer-name">Connect</span>
+              <span class="layer-count" data-count="connect">21</span>
+            </button>
         </div>
+        </section>
+
+        <section class="distribution">
+          <p class="panel-label">Category distribution</p>
+          <div class="distribution-bar" aria-label="Distribution by category">
+            <span data-bar="learn"></span>
+            <span data-bar="experience"></span>
+            <span data-bar="make"></span>
+            <span data-bar="connect"></span>
+          </div>
+        </section>
+
         <button class="reset-map" id="reset-map" type="button">
           Show all NYC resources
         </button>
         <p class="status" id="map-status">Preparing the map interface.</p>
+
+        <footer class="panel-footer">
+          NYC Open Data · DCLA · OpenStreetMap contributors
+        </footer>
       </aside>
 
       <div id="map" aria-label="Interactive map of New York City"></div>
     </main>
 
     <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
-    <script src="js/map.js?v=20260729-3"></script>
+    <script src="js/map.js?v=20260729-4"></script>
   </body>
 </html>
