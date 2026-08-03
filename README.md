@@ -45,11 +45,12 @@ The analysis measures the geographic concentration of documented locations. It
 does not measure affordability, eligibility, quality, capacity, opening hours,
 or whether a resource is publicly accessible.
 
-The walking analysis requires a public Mapbox access token. The interface asks
-for the token when the map opens and stores it only in that browser's local
-storage; no token is committed to the repository. Isochrones represent estimated
-network travel time and do not account for opening hours, cost, eligibility,
-capacity, or all real-world pedestrian conditions.
+The walking analysis requires a public Mapbox access token. The deployed site
+receives it from the `MAPBOX_PUBLIC_TOKEN` GitHub Actions secret during the Pages
+build; no token is committed to the repository. A local preview falls back to a
+one-time token prompt and stores the public token in that browser. Isochrones
+represent estimated network travel time and do not account for opening hours,
+cost, eligibility, capacity, or all real-world pedestrian conditions.
 
 ## Project structure
 

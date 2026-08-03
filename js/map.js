@@ -330,7 +330,11 @@ tokenForm.addEventListener("submit", (event) => {
 });
 tokenInput.addEventListener("input", () => tokenInput.setCustomValidity(""));
 
-const storedToken = localStorage.getItem("designResourcesMapboxToken");
+const deployedToken = window.DESIGN_RESOURCES_MAPBOX_TOKEN;
+const validDeployedToken =
+  deployedToken && !deployedToken.startsWith("__") ? deployedToken : null;
+const storedToken =
+  validDeployedToken || localStorage.getItem("designResourcesMapboxToken");
 if (storedToken) {
   initializeMap(storedToken);
 } else {
