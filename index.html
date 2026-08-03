@@ -9,10 +9,10 @@
     />
     <title>Design Resources NYC</title>
     <link
-      href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css"
+      href="https://api.mapbox.com/mapbox-gl-js/v3.27.0/mapbox-gl.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css?v=20260729-3" />
+    <link rel="stylesheet" href="css/style.css?v=20260803-1" />
   </head>
   <body>
     <main class="map-shell">
@@ -38,6 +38,9 @@
             </button>
             <button type="button" data-mode="neighborhoods" aria-pressed="false">
               Neighborhoods
+            </button>
+            <button type="button" data-mode="access" aria-pressed="false">
+              Walking access
             </button>
           </div>
         </section>
@@ -109,6 +112,35 @@
           </p>
         </section>
 
+        <section class="access-analysis" data-access-panel hidden>
+          <p class="panel-label">Walking-time analysis</p>
+          <p class="access-instruction">
+            Choose a travel time, then click a starting location on the map.
+          </p>
+          <div class="time-switch" role="group" aria-label="Walking time">
+            <button type="button" data-minutes="10" aria-pressed="false">10 min</button>
+            <button type="button" data-minutes="20" aria-pressed="true">20 min</button>
+            <button type="button" data-minutes="30" aria-pressed="false">30 min</button>
+          </div>
+          <div class="access-result" id="access-result" hidden>
+            <strong id="reachable-total">0</strong>
+            <span id="reachable-label">resources reachable in 20 minutes</span>
+            <dl class="reachable-counts">
+              <div><dt><i data-access-swatch="learn"></i>Learn</dt><dd data-reachable="learn">0</dd></div>
+              <div><dt><i data-access-swatch="experience"></i>Experience</dt><dd data-reachable="experience">0</dd></div>
+              <div><dt><i data-access-swatch="make"></i>Make</dt><dd data-reachable="make">0</dd></div>
+              <div><dt><i data-access-swatch="connect"></i>Connect</dt><dd data-reachable="connect">0</dd></div>
+            </dl>
+          </div>
+          <button class="clear-access" id="clear-access" type="button" disabled>
+            Clear walking area
+          </button>
+          <p class="method-note">
+            Reachable areas follow the pedestrian street network. Results are
+            estimates and do not account for opening hours, cost, or eligibility.
+          </p>
+        </section>
+
         <button class="reset-map" id="reset-map" type="button">
           Show all NYC resources
         </button>
@@ -120,9 +152,24 @@
       </aside>
 
       <div id="map" aria-label="Interactive map of New York City"></div>
+
+      <div class="token-gate" id="token-gate" role="dialog" aria-labelledby="token-title" hidden>
+        <form id="token-form">
+          <p class="panel-label">Map setup</p>
+          <h2 id="token-title">Connect the walking analysis</h2>
+          <p>
+            Enter a public Mapbox access token to load the basemap and calculate
+            walking-time areas. The token stays in this browser.
+          </p>
+          <label for="mapbox-token">Public Mapbox token</label>
+          <input id="mapbox-token" name="token" type="text" inputmode="text" autocomplete="off" placeholder="pk.ey…" required />
+          <button type="submit">Load map</button>
+          <a href="https://console.mapbox.com/account/access-tokens/" target="_blank" rel="noreferrer">Create or copy a public token</a>
+        </form>
+      </div>
     </main>
 
-    <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
-    <script src="js/map.js?v=20260729-5"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.27.0/mapbox-gl.js"></script>
+    <script src="js/map.js?v=20260803-1"></script>
   </body>
 </html>

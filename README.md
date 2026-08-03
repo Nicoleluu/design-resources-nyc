@@ -18,18 +18,22 @@ This project expands the course assignments on loading and visualizing spatial d
 1. Public spatial data is collected and preserved in `data/raw`.
 2. Python will clean, verify, categorize, and spatially join resources to NYC neighborhoods.
 3. Map-ready GeoJSON will be written to `data/processed`.
-4. JavaScript and MapLibre GL JS will render an interactive web map.
+4. JavaScript and Mapbox GL JS render the interactive map and request walking
+   isochrones from the Mapbox Navigation API.
 
 ## Analytical purpose
 
 The project asks: **How evenly are design-related resources distributed across
 New York City?**
 
-The website has two map modes:
+The website has three map modes:
 
 - **Resources** shows individual documented locations by category.
 - **Neighborhoods** aggregates those locations into the 262 NYC Neighborhood
   Tabulation Areas and maps their concentration.
+- **Walking access** lets a viewer choose a 10-, 20-, or 30-minute walk and
+  click a starting location. The street-network isochrone highlights and counts
+  the documented resources estimated to be reachable within that time.
 
 The neighborhood workflow is a spatial join implemented in
 `scripts/process_data.py`. For every neighborhood, it calculates the total and
@@ -40,6 +44,12 @@ difference from the NYC neighborhood average. The output is
 The analysis measures the geographic concentration of documented locations. It
 does not measure affordability, eligibility, quality, capacity, opening hours,
 or whether a resource is publicly accessible.
+
+The walking analysis requires a public Mapbox access token. The interface asks
+for the token when the map opens and stores it only in that browser's local
+storage; no token is committed to the repository. Isochrones represent estimated
+network travel time and do not account for opening hours, cost, eligibility,
+capacity, or all real-world pedestrian conditions.
 
 ## Project structure
 

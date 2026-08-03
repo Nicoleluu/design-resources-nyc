@@ -130,7 +130,7 @@ body {
 
 .mode-switch {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   padding: 3px;
   border: 1px solid var(--line);
   background: rgba(0, 0, 0, 0.18);
@@ -324,7 +324,7 @@ button[aria-pressed="false"] {
   line-height: 1.5;
 }
 
-.maplibregl-popup-content {
+.mapboxgl-popup-content {
   max-width: 260px;
   border: 1px solid var(--line);
   border-radius: 0;
@@ -333,7 +333,7 @@ button[aria-pressed="false"] {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
 }
 
-.maplibregl-popup-content h2 {
+.mapboxgl-popup-content h2 {
   margin: 4px 0 8px;
   font-family: inherit;
   font-size: 1.05rem;
@@ -341,17 +341,17 @@ button[aria-pressed="false"] {
   letter-spacing: -0.015em;
 }
 
-.maplibregl-popup-content p {
+.mapboxgl-popup-content p {
   margin: 0 0 8px;
   color: var(--muted);
 }
 
-.maplibregl-popup-content a,
+.mapboxgl-popup-content a,
 .popup-category {
   color: var(--accent);
 }
 
-.maplibregl-popup-content a {
+.mapboxgl-popup-content a {
   display: inline-block;
   margin-top: 4px;
   font-weight: 700;
@@ -370,12 +370,37 @@ button[aria-pressed="false"] {
   text-transform: uppercase;
 }
 
-.maplibregl-popup-close-button {
+.mapboxgl-popup-close-button {
   color: var(--text);
 }
 
-.maplibregl-ctrl-attrib,
-.maplibregl-ctrl-attrib.maplibregl-compact-show {
+.access-instruction { margin: 0 0 14px; color: var(--muted); font-size: 0.72rem; line-height: 1.5; }
+.time-switch { display: grid; grid-template-columns: repeat(3, 1fr); padding: 3px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.18); }
+.time-switch button { padding: 8px 4px; border: 0; color: var(--muted); font-size: 0.72rem; text-align: center; }
+.time-switch button[aria-pressed="true"] { background: var(--accent); color: var(--background); opacity: 1; }
+.access-result { margin-top: 18px; }
+.access-result > strong { display: block; font-size: 2.4rem; font-weight: 550; letter-spacing: -0.045em; line-height: 1; }
+.access-result > span { display: block; margin-top: 7px; color: var(--muted); font-size: 0.7rem; }
+.reachable-counts { margin: 15px 0 0; }
+.reachable-counts div { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--line); }
+.reachable-counts dt { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.7rem; }
+.reachable-counts dd { margin: 0; font-size: 0.74rem; font-weight: 700; }
+.reachable-counts i { width: 7px; height: 7px; border-radius: 50%; background: var(--category-color); }
+.clear-access { width: 100%; margin-top: 14px; border: 1px solid var(--line); color: var(--text); font-size: 0.72rem; text-align: center; }
+.clear-access:disabled { cursor: not-allowed; opacity: 0.35; }
+.token-gate { position: absolute; z-index: 5; inset: 52px 0 0; display: grid; place-items: center; padding: 24px; background: rgba(7, 11, 14, 0.92); backdrop-filter: blur(10px); }
+.token-gate form { width: min(440px, 100%); padding: 28px; border: 1px solid var(--line); background: #12191f; box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45); }
+.token-gate h2 { margin: 0 0 12px; font-size: 1.35rem; }
+.token-gate p:not(.panel-label) { margin: 0 0 20px; color: var(--muted); font-size: 0.8rem; line-height: 1.55; }
+.token-gate label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 0.7rem; }
+.token-gate input { width: 100%; padding: 11px 12px; border: 1px solid var(--line); outline: none; background: #0c1115; color: var(--text); font: inherit; }
+.token-gate input:focus { border-color: var(--accent); }
+.token-gate button { width: 100%; margin-top: 12px; padding: 11px; border: 1px solid var(--accent); background: var(--accent); color: var(--background); font-size: 0.78rem; font-weight: 700; text-align: center; }
+.token-gate a { display: inline-block; margin-top: 16px; color: var(--muted); font-size: 0.72rem; }
+.map-shell.is-access-mode #map canvas { cursor: crosshair; }
+
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-attrib.mapboxgl-compact-show {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0;
   background: rgba(7, 10, 12, 0.82);
@@ -384,7 +409,7 @@ button[aria-pressed="false"] {
   box-shadow: none;
 }
 
-.maplibregl-ctrl-attrib a {
+.mapboxgl-ctrl-attrib a {
   color: #899196;
 }
 
