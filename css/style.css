@@ -374,6 +374,20 @@ button[aria-pressed="false"] {
   color: var(--text);
 }
 
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib.maplibregl-compact-show {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  background: rgba(7, 10, 12, 0.82);
+  color: #737b80;
+  font-size: 9px;
+  box-shadow: none;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: #899196;
+}
+
 @media (max-width: 700px) {
   .app-bar p {
     display: none;
